@@ -10,6 +10,7 @@
 #include "MemBlock.hpp"
 #include <iostream>
 
+using namespace std;
 /////////////////////////////////////////////////////////////////////////////////
 // Level 0 Methods
 /////////////////////////////////////////////////////////////////////////////////
@@ -73,9 +74,16 @@ void MemList::displayReserved()
 //
 MemList::MemList(unsigned int s_addr, unsigned int block_size)
 {
-    // To be implemented(replace the two lines below)
-    free_head = NULL;
-    reserved_head = NULL;
+   MemBlock * temp = new MemBlock(s_addr, block_size);
+   temp->setAddr(s_addr);
+   temp->setSize(block_size);
+   free_head = temp;
+   MemBlock * temp2 = new MemBlock(0, 0);
+   temp2->setAddr(0);
+   temp2->setSize(0);
+   reserved_head = temp2;
+   
+
 }
 
 // Find the first MemBlock in the Free list which greater than or equal to the amount requested(via 
@@ -89,9 +97,34 @@ MemList::MemList(unsigned int s_addr, unsigned int block_size)
 //
 MemBlock * MemList::reserveMemBlock(unsigned int block_size)
 {
-    // To be implemented
-    return NULL;
+   MemBlock * current = free_head;
+   
+    if(freeSize() < block_size) 
+      { cout << "Error, not enough free memory" << endl;
+      return NULL;}
+    else {
+      while(current->getNext() != NULL) {
+      if(current->getSize() >= block_size) {
+         MemBlock * temp = new MemBlock (current->getAddr(), block_size);
+         temp->setNext(reserved_head);
+         reserved_head = temp;
+         current->setAddr(current->getAddr() + block_size);
+         current->setSize(current->getSize() - block_size);
+         return temp;
+       } else { current = current->getNext();}}
+       if(current->getSize() >= block_size) {
+         MemBlock * temp = new MemBlock (current->getAddr(), block_size);
+         temp->setNext(reserved_head);
+         reserved_head = temp;
+         current->setAddr(current->getAddr() + block_size);
+         current->setSize(current->getSize() - block_size);
+         return temp;
+         }
+      return NULL;
+    }
 }
+
+
 
 
 // Return the total size of all blocks in the Reserved List
@@ -100,8 +133,17 @@ MemBlock * MemList::reserveMemBlock(unsigned int block_size)
 //
 unsigned int MemList::reservedSize()
 {
-    // To be implemented
-    return 0;
+    MemBlock * current = reserved_head;
+    unsigned int x = 0;
+
+    while(current->getNext() != NULL) {
+       x += current->getSize();
+      current = current->getNext();
+    }
+      x += current->getSize();
+
+   return x;  
+
 }
 
 // Return the total size of all blocks in the Free List
@@ -109,8 +151,16 @@ unsigned int MemList::reservedSize()
 // Level 1
 unsigned int MemList::freeSize()
 {
-    // To be implemented
-    return 0;
+    MemBlock * current = free_head;
+    unsigned int x = 0;
+
+    while(current->getNext() != NULL) {
+       x += current->getSize();
+      current = current->getNext();
+    }
+      x += current->getSize();
+
+   return x;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
