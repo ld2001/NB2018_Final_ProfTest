@@ -176,8 +176,35 @@ unsigned int MemList::freeSize()
 //
 bool MemList::freeMemBlock(MemBlock * block_to_free)
 {
-    // To be implemented
-    return false;
+    if(block_to_free == NULL) {return false;} else {
+    
+    MemBlock * current_free = free_head;
+    MemBlock * current_reserved = reserved_head;
+
+   while(current_reserved->getNext() != block_to_free)
+   {
+      current_reserved = current_reserved->getNext();
+   }
+
+   if(free_head == NULL) {
+      free_head = block_to_free;
+      current_reserved->setNext(block_to_free->getNext());
+      block_to_free->setNext(NULL);
+    } else if(block_to_free->getAddr() < free_head->getAddr()) { 
+      current_reserved->setNext(block_to_free->getNext());
+      block_to_free->setNext(free_head); 
+      free_head = block_to_free;
+    } else {
+      while(current_free->getNext()->getAddr() < block_to_free->getAddr() && current_free->getNext() != NULL) {
+         current_free = current_free->getNext();
+      }
+      
+      current_reserved->setNext(block_to_free->getNext());
+      block_to_free->setNext(current_free->getNext());
+      current_free->setNext(block_to_free);
+    }
+    return true;
+    }
 }
 
 
@@ -188,8 +215,16 @@ bool MemList::freeMemBlock(MemBlock * block_to_free)
 //
 MemBlock * MemList::maxFree() 
 {
-    // To be implemented
-    return NULL;
+    MemBlock * current = free_head;
+    MemBlock * max = free_head;
+
+    while(current->getNext() != NULL) {
+      if(max->getSize() < current->getSize()) {
+         max = current;
+      }
+      current = current->getNext();
+    }
+    return max;
 }
 
 // Return a pointer to the MemBlcok with the smallest size from the Free List
@@ -198,8 +233,16 @@ MemBlock * MemList::maxFree()
 //
 MemBlock * MemList::minFree()
 {
-    // To be implemented
-    return NULL;
+    MemBlock * current = free_head;
+    MemBlock * min = free_head;
+
+    while(current->getNext() != NULL) {
+      if(min->getSize() > current->getSize()) {
+         min = current;
+      }
+      current = current->getNext();
+    }
+    return min;
 }
 
 // Return the number of MemBlocks in the Free List
@@ -208,8 +251,17 @@ MemBlock * MemList::minFree()
 //
 unsigned int MemList::freeBlockCount()
 {
-    // To be implemented
-    return 0;
+    MemBlock * current = free_head;
+    unsigned int count = 0;
+
+    while(current->getNext() != NULL) {
+      if(current->getSize() != 0) {
+         count++;
+      }
+      current = current->getNext();
+    }
+    return count;
+ 
 }
 
 /////////////////////////////////////////////////////////////////////////////////
